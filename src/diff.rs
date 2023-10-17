@@ -3,7 +3,9 @@ use console::style;
 
 pub struct Diff {
     pub files: Vec<Dfile>,
-    pub wordlist: Vec<String>
+    pub wordlist: Vec<String>,
+    pub current_file: bool
+	
 }
 
 #[derive(Debug)]
@@ -23,11 +25,20 @@ pub struct Dfile {
 }
 
 impl Diff {
+
+    pub fn disbatch_line(&mut self) {
+	if self.current_file {
+	    let last_index = self.files.len() - 1;
+	    self.files[last_index].closed = true;
+	    self.files[last_index].current_line += 1
+	}
+    }
     
     pub fn close_dfile(&mut self) {
 	if &self.files.len() > &0 {
 	    let last_index = self.files.len() - 1;
-	    self.files[last_index].closed = true
+	    self.files[last_index].closed = true;
+	    self.current_file = false
 	}
     }
     
@@ -40,20 +51,21 @@ impl Diff {
 	    curses: Vec::new(),
 	    offenses: 0,
 	    closed: false
-	})
+	});
+	self.current_file = true
     }
     
     pub fn get_linestart(&mut self, _line: String) { // @@ -34,6 +34,8 @@ //line 34
 	// I saw a bug with this not working right
-	println!("{}", _line);
 	let line_start = Regex::new(r"\+\d\d?\d?\d?\d?").unwrap();
 	let m = line_start.find(&_line).unwrap();
 	let last_index = self.files.len() - 1;
 	self.files[last_index].line_start = m.
 	    as_str()
 	    .split_at(1).1.parse::<i32>().unwrap();
-	    println!("{:?}", self.files[last_index].line_start);
-	    println!("{:?}", self.files[last_index].filename)
+	self.files[last_index].current_line = m.
+	    as_str()
+	    .split_at(1).1.parse::<i32>().unwrap();
     }
 
     pub fn load_bad_word_list(&mut self) {
@@ -62,12 +74,10 @@ impl Diff {
    }
     
     pub fn check_diff_line(&mut self, _line: String) {
-	println!("{}", _line);
 	let last_index = self.files.len() - 1;
 	self.files[last_index].current_line += 1;
 	let mut cursed = false;
 	let current_line = self.files[last_index].current_line.to_owned();
-	println!("{}", self.files[last_index].current_line.to_owned());
 	for word in _line.split_whitespace() {
 	    if self.wordlist.iter().any(|e| word.contains(e)){
 		if !cursed {
