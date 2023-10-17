@@ -1,0 +1,10 @@
+[package]
+name = "git-professional"
+version = "0.1.0"
+edition = "2021"
+
+# this is a test
+
+[dependencies]
+console = "0.15.7"
+regex = "1.10.0"
