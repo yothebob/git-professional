@@ -25,7 +25,9 @@ fn disbatch_output(_output: String) -> Diff {
 				   wordlist: Vec::new(),
 				   current_file: false
     };
-    diff_file.load_bad_word_list();
+    diff_file.read_curse_lib();
+    println!("Wordlist: {:?}", diff_file.wordlist);
+
     for i in _output.lines() {
 	match i {
 	    x if x.starts_with("+++") => diff_file.add_dfile(x.to_string()),

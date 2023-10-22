@@ -1,5 +1,6 @@
 use regex::Regex;
 use console::style;
+use std::fs;
 
 pub struct Diff {
     pub files: Vec<Dfile>,
@@ -26,6 +27,16 @@ pub struct Dfile {
 
 impl Diff {
 
+    pub fn read_curse_lib(&mut self) {
+	let contents = fs::read_to_string("words.txt").expect("Should be able to read file");
+	for word in contents.split_whitespace() {
+	    self.wordlist.push(word.to_owned())
+	}
+	if self.wordlist.len() <= 0 {
+	    self.load_bad_word_list()
+	}
+    }
+    
     pub fn disbatch_line(&mut self) {
 	if self.current_file {
 	    let last_index = self.files.len() - 1;
@@ -75,7 +86,6 @@ impl Diff {
     
     pub fn check_diff_line(&mut self, _line: String) {
 	let last_index = self.files.len() - 1;
-	self.files[last_index].current_line += 1;
 	let mut cursed = false;
 	let current_line = self.files[last_index].current_line.to_owned();
 	for word in _line.split_whitespace() {
@@ -90,6 +100,7 @@ impl Diff {
 		self.files[last_index].offenses += 1
 	    } 
 	}
+	self.files[last_index].current_line += 1;
     }
 
     pub fn display_diff(&mut self) {
